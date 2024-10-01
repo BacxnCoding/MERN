@@ -42,4 +42,39 @@ router.get('/roles', async (req, res) => {
   }
 });
 
+// PATCH Role by ID (update specific fields)
+router.patch('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body; // Fields to update (e.g., permissions, description)
+
+    const updatedRole = await Role.findByIdAndUpdate(id, updates, { new: true });
+
+    if (!updatedRole) {
+      return res.status(404).json({ error: 'Role not found' });
+    }
+
+    res.json(updatedRole);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update role' });
+  }
+});
+
+// DELETE Role by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete the role by ID
+    const deletedRole = await Role.findByIdAndDelete(id);
+
+    if (!deletedRole) {
+      return res.status(404).json({ error: 'Role not found' });
+    }
+
+    res.json({ message: 'Role deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete role' });
+  }
+});
 module.exports = router;
