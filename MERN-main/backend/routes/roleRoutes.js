@@ -35,7 +35,7 @@ router.post('/roles', async (req, res) => {
 // Get all roles
 router.get('/roles', async (req, res) => {
   try {
-    const roles = await Role.find().populate('nation_id');
+    const roles = await Role.find().populate('nation_id','_id');
     res.json(roles);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch roles' });
