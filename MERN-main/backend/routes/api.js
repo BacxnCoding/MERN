@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const User = require('../models/User'); 
 const Nation = require('../models/Nation');
 const PurchaseRequest = require('../models/PurchaseRequest');
 
 // Login route with role and nation population
-router.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const user = await User.findOne({ username, password }).populate('nation');
+    const user = await User.findOne({ username, password }).populate('nation');  // Ensure nation is populated
     if (user) {
-      res.json({ ...user._doc, isAdmin: user.isAdmin });
+      res.json(user);  // Send back the full user object with the nation data populated
     } else {
       res.status(401).json({ error: 'Invalid username or password' });
     }

@@ -5,7 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const nationRoutes = require('./routes/nationRoutes');
 const userRoutes = require('./routes/userRoutes');
-const roleRoutes = require('./routes/roleRoutes');  // Add the role routes
+
 const User = require('./models/User');
 require('dotenv').config();
 
@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 //routes
 app.use('/api/users', userRoutes);
 app.use('/api/nations', nationRoutes);
-app.use('/api', roleRoutes);  // Add the role routes
+
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected successfully!'))
@@ -88,23 +88,7 @@ app.put('/api/users/:id/assign-nation', async (req, res) => {
   }
 });
 
-// Assign Roles to User
-app.put('/api/users/:id/assign-roles', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { roles } = req.body;
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    user.roles = roles;
-    await user.save();
-    const updatedUser = await User.findById(id).populate('nation');
-    res.json(updatedUser);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to assign roles' });
-  }
-});
+
 
 const PORT = 5000;
 server.listen(PORT, () => {

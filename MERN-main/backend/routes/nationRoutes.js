@@ -13,6 +13,22 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get a single nation by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const nation = await Nation.findById(id);
+
+    if (!nation) {
+      return res.status(404).json({ error: 'Nation not found' });
+    }
+
+    res.json(nation);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch nation' });
+  }
+});
+
 // Update nation stats (PUT request)
 router.put('/:id', async (req, res) => {
   try {
@@ -29,28 +45,82 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+
 // Create a new nation with values from the request body
 router.post('/', async (req, res) => {
   try {
-    const { name, nationalBank, soldiersAmount, people, military, economy } = req.body;
+    const { 
+      name, 
+      nationalBank, 
+      peopleindex, 
+      militaryindex, 
+      economyindex, 
+      people, 
+      military, 
+      economy 
+    } = req.body;
 
     // Create a new nation
     const newNation = new Nation({
       name,
       nationalBank,
-      soldiersAmount,
-      people,
-      military,
-      economy,
+      peopleindex,   // Index value for people
+      militaryindex, // Index value for military
+      economyindex,  // Index value for economy
+      people: {
+        TotalBudget: people.TotalBudget || 0,
+        health: {
+          procedures: people.health?.procedures || 0,
+          vaccines: people.health?.vaccines || 0,
+          hospitals: people.health?.hospitals || 0,
+        },
+        satisfaction: {
+          infrastructure: people.satisfaction?.infrastructure || 0,
+          politicalStability: people.satisfaction?.politicalStability || 0,
+          education: people.satisfaction?.education || 0,
+          internalSafety: people.satisfaction?.internalSafety || 0,
+          freedom: people.satisfaction?.freedom || 0,
+          economy: people.satisfaction?.economy || 0,
+        },
+        productivity: people.productivity || 0,
+      },
+      military: {
+        TotalBudget: military.TotalBudget || 0,
+        personnel: {
+          training: military.personnel?.training || 0,
+          wellBeing: military.personnel?.wellBeing || 0,
+        },
+        equipment: {
+          bases: military.equipment?.bases || 0,
+          ports: military.equipment?.ports || 0,
+          communication: military.equipment?.communication || 0,
+          equipmentQuality: military.equipment?.equipmentQuality || 0,
+        },
+        performance: military.performance || 0,
+      },
+      economy: {
+        inflation: economy.inflation || 0,
+        income: {
+          taxRate: economy.income?.taxRate || 0,
+          exports: economy.income?.exports || 0,
+        },
+        spending: {
+          debt: economy.spending?.debt || 0,
+          imports: economy.spending?.imports || 0,
+        },
+      },
     });
 
     // Save the new nation to the database
     await newNation.save();
     res.status(201).json(newNation);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create nation' });
+    res.status(500).json({ error: 'Failed to create nation', details: error.message });
   }
 });
+
+module.exports = router;
+
 
 // Patch nation (update specific fields)
 router.patch('/:id', async (req, res) => {
