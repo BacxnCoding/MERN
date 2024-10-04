@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import axios from 'axios';
+import { UserContext } from './UserContext';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
+  const { login } = useContext(UserContext); // Get the login function from context
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -10,7 +12,7 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/api/login', { username, password });
-      onLogin(response.data);
+      login(response.data);  // Call login from context
       setError('');
     } catch (error) {
       setError('Invalid username or password');

@@ -1,10 +1,11 @@
-// Inventory.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import Shop from './Shop';
 import NationInfo from './NationInfo';
+import { UserContext } from './UserContext';  // Import UserContext
 
-const Inventory = ({ user, setUser }) => {
+const Inventory = () => {
+  const { user } = useContext(UserContext);  // Access user from context
   const [requests, setRequests] = useState([]);
   const [customItem, setCustomItem] = useState('');
   const [customPrice, setCustomPrice] = useState(0);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Hub from './components/Hub';
 import Wiki from './components/Wiki';
@@ -7,17 +7,10 @@ import Map from './components/Map';
 import Support from './components/Support';
 import Admin from './components/Admin';
 import Login from './components/Login';
+import { UserContext } from './components/UserContext';  // Import UserContext
 
 const App = () => {
-  const [user, setUser] = useState(null);
-
-  const handleLogin = (loggedInUser) => {
-    setUser(loggedInUser);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-  };
+  const { user, logout } = useContext(UserContext);  // Access user and logout from context
 
   return (
     <Router>
@@ -26,7 +19,7 @@ const App = () => {
           {user ? (
             <>
               <p>Logged in as: {user.username}</p>
-              <button onClick={handleLogout}>Logout</button>
+              <button onClick={logout}>Logout</button>  {/* Use logout from context */}
             </>
           ) : (
             <p>Not logged in</p>
@@ -50,13 +43,11 @@ const App = () => {
         <Routes>
           <Route path="/" exact element={<Hub />} />
           <Route path="/wiki" element={<Wiki />} />
-          <Route path="/inventory" element={<Inventory user={user} setUser={setUser} />} />
+          <Route path="/inventory" element={<Inventory />} />
           <Route path="/map" element={<Map />} />
-          <Route path="/support" element={<Support user={user} />} />
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
-          {user && user.isAdmin && (
-            <Route path="/admin" element={<Admin user={user} />} />
-          )}
+          <Route path="/support" element={<Support />} />
+          {user && user.isAdmin && <Route path="/admin" element={<Admin />} />}
+          {!user && <Route path="/login" element={<Login />} />}
         </Routes>
       </div>
     </Router>
