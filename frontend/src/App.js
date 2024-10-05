@@ -13,7 +13,8 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import AdminNationDetails from './components/admin/AdminNationDetails';
 import AdminUserDetails from './components/admin/AdminUserDetails';
 import AdminEditNation from './components/admin/AdminEditNation';
-
+import AdminCreateNation from './components/admin/AdminCreateNation';
+import AdminCreateUser from './components/admin/AdminCreateUser';
 
 const App = () => {
   const { user, logout } = useContext(UserContext);  // Get user state and logout function from context
@@ -64,6 +65,8 @@ const App = () => {
           {user && user.isAdmin && (
             <>
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/create-nation" element={<AdminCreateNation />} />
+              <Route path="/admin/create-user" element={<AdminCreateUser />} />
               <Route path="/admin/nation/:id" element={<AdminNationDetails />} />
               <Route path="/admin/user/:id" element={<AdminUserDetails />} />
               <Route path="/admin/nation/edit/:id" element={<AdminEditNation />} />

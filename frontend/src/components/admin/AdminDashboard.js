@@ -24,24 +24,6 @@ const AdminDashboard = () => {
     fetchNations();
   }, []);
 
-  // Handle the delete action
-  const handleDelete = async (nationId) => {
-    const password = prompt('Enter admin password to confirm deletion:');
-    
-    if (password === user.password) {  // Ensure the admin's password is correct
-      try {
-        await axios.delete(`http://localhost:5000/api/nations/${nationId}`);
-        alert('Nation deleted successfully');
-        setNations((prevNations) => prevNations.filter(nation => nation._id !== nationId));  // Remove nation from list
-      } catch (error) {
-        console.error('Error deleting nation:', error);
-        alert('Failed to delete the nation');
-      }
-    } else {
-      alert('Incorrect password!');
-    }
-  };
-
   // Handle the "View Nation" action
   const handleViewNation = (nationId) => {
     navigate(`/admin/nation/${nationId}`);  // Navigate to the nation details page
@@ -58,6 +40,23 @@ const AdminDashboard = () => {
     }
   };
 
+  // Handle the "Delete Nation" action
+  const handleDelete = async (nationId) => {
+    const password = prompt('Enter admin password to confirm deletion:');
+    if (password === user.password) {  // Validate admin password before deleting
+      try {
+        await axios.delete(`http://localhost:5000/api/nations/${nationId}`);
+        alert('Nation deleted successfully');
+        setNations(nations.filter((nation) => nation._id !== nationId));  // Update UI after deletion
+      } catch (error) {
+        console.error('Error deleting nation:', error);
+        alert('Failed to delete nation');
+      }
+    } else {
+      alert('Incorrect password!');
+    }
+  };
+
   if (loading) {
     return <p>Loading nations...</p>;
   }
@@ -65,26 +64,21 @@ const AdminDashboard = () => {
   return (
     <div>
       <h2>Admin Dashboard</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Nation Name</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {nations.map((nation) => (
-            <tr key={nation._id}>
-              <td>{nation.name}</td>
-              <td>
-                <button onClick={() => handleDelete(nation._id)}>Delete</button>
-                <button onClick={() => handleViewNation(nation._id)}>View Nation</button>
-                <button onClick={() => handleEdit(nation._id)}>Edit Nation</button>  {/* Ensure edit button works */}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      <button onClick={() => navigate('/admin/create-nation')}>Create New Nation</button>
+      <button onClick={() => navigate('/admin/create-user')}>Create New User</button>
+
+      <h3>Nations List</h3>
+      <ul>
+        {nations.map((nation) => (
+          <li key={nation._id}>
+            {nation.name}
+            <button onClick={() => handleViewNation(nation._id)}>View Nation</button>
+            <button onClick={() => handleEdit(nation._id)}>Edit Nation</button>
+            <button onClick={() => handleDelete(nation._id)}>Delete Nation</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
