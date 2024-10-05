@@ -53,16 +53,16 @@ router.patch('/:id', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Notify clients via WebSocket
+    // Notify clients about role change via WebSocket
     req.wss.clients.forEach((client) => {
       if (client.readyState === 1) {  // WebSocket.OPEN is 1
-        client.send(JSON.stringify({ type: 'user-update', user: updatedUser }));
+        client.send(JSON.stringify({ type: 'user-role-update', user: updatedUser }));
       }
     });
 
     res.json(updatedUser);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update user' });
+    res.status(500).json({ error: 'Failed to update user roles' });
   }
 });
 

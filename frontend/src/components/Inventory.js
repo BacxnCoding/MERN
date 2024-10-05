@@ -40,6 +40,23 @@ const Inventory = () => {
       console.log('WebSocket message received:', message);
 
       switch (message.type) {
+        case 'user-update':
+          if (message.user._id === user._id) {  // Update only if the user's ID matches
+            console.log('Handling user update:', message.user);
+            setUser(message.user);  // Update the user state with real-time data
+          }
+          break;
+
+        case 'user-role-update':  // Handle role update
+          if (message.user._id === user._id) {  // Ensure it's the current user
+            console.log('Handling user role update:', message.user.roles);
+            setUser((prevUser) => ({
+              ...prevUser,
+              roles: message.user.roles,  // Update the user's roles in state
+            }));
+          }
+          break;
+
         case 'nation-update':
           if (message.nation._id === user.nation_id) {  // Update only if the nation's ID matches the user's nation
             console.log('Handling nation update:', message.nation);
@@ -61,7 +78,7 @@ const Inventory = () => {
       console.log('WebSocket disconnected');
       socket.close();
     };
-  }, [user]);
+  }, [user, setUser]);
 
   return (
     <div>
@@ -88,7 +105,6 @@ const Inventory = () => {
         )}
       </ul>
 
-      {/* Shop component for purchasing */}
       <Shop user={user} />
     </div>
   );
