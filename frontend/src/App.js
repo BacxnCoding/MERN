@@ -1,13 +1,19 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';  // Import Navigate for redirection
 import Hub from './components/Hub';
 import Wiki from './components/Wiki';
 import Inventory from './components/Inventory';
 import Map from './components/Map';
 import Support from './components/Support';
-import Admin from './components/Admin';
 import Login from './components/Login';  // Ensure Login component is imported
 import { UserContext } from './components/UserContext';  // Import UserContext for user state
+
+// Import the admin components from the admin folder
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminNationDetails from './components/admin/AdminNationDetails';
+import AdminUserDetails from './components/admin/AdminUserDetails';
+import AdminEditNation from './components/admin/AdminEditNation';
+
 
 const App = () => {
   const { user, logout } = useContext(UserContext);  // Get user state and logout function from context
@@ -44,7 +50,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Hub />} />
           <Route path="/wiki" element={<Wiki />} />
-          
+
           {/* Protected Route: Only allow access to inventory if user is logged in */}
           <Route 
             path="/inventory" 
@@ -53,15 +59,20 @@ const App = () => {
 
           <Route path="/map" element={<Map />} />
           <Route path="/support" element={<Support />} />
-          
-          {/* Admin route: Only show if user is an admin */}
+
+          {/* Admin routes */}
           {user && user.isAdmin && (
-            <Route path="/admin" element={<Admin />} />
+            <>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/nation/:id" element={<AdminNationDetails />} />
+              <Route path="/admin/user/:id" element={<AdminUserDetails />} />
+              <Route path="/admin/nation/edit/:id" element={<AdminEditNation />} />
+            </>
           )}
 
           {/* Route for login */}
           {!user && <Route path="/login" element={<Login />} />}  {/* Show login form if not logged in */}
-          
+
           {/* Fallback: If no routes match, redirect to login */}
           <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
         </Routes>

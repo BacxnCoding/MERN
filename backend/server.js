@@ -22,7 +22,15 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
-app.use('/api/users', userRoutes);
+// Attach `wss` to `req` and pass to nationRoutes
+app.use('/api/nations', (req, res, next) => {
+  req.wss = wss;
+  next();
+}, nationRoutes);
+app.use('/api/users', (req, res, next) => {
+  req.wss = wss;
+  next();
+}, userRoutes);
 
 
 
@@ -116,11 +124,7 @@ const notifyClients = (message) => {
     }
   });
 };
-// Attach `wss` to `req` and pass to nationRoutes
-app.use('/api/nations', (req, res, next) => {
-  req.wss = wss;
-  next();
-}, nationRoutes);
+
 // Start the server
 const PORT = 5000;
 server.listen(PORT, () => {

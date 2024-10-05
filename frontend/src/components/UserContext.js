@@ -1,10 +1,11 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-// Create the UserContext with an initial value (set as null or empty object)
+// Create the UserContext with an initial value
 export const UserContext = createContext({
   user: null,
   login: () => {},
   logout: () => {},
+  setUser: () => {},  // Add setUser function to the context
 });
 
 export const UserProvider = ({ children }) => {
@@ -31,7 +32,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, setUser }}>  {/* Add setUser to value */}
       {children}
     </UserContext.Provider>
   );

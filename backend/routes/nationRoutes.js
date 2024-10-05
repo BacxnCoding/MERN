@@ -70,24 +70,19 @@ router.patch('/:id', async (req, res) => {
 // Delete a nation by ID
 router.delete('/:id', async (req, res) => {
   try {
-    const deletedNation = await Nation.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+    const deletedNation = await Nation.findByIdAndDelete(id);
 
     if (!deletedNation) {
       return res.status(404).json({ error: 'Nation not found' });
     }
 
-    console.log('Nation deleted:', deletedNation);  // Log nation deletion
-    process.nextTick(() => {
-      console.log('Broadcasting nation deletion to WebSocket clients');  // Log WebSocket broadcast
-      notifyClients(req.wss, { type: 'nation-delete', nationId: deletedNation._id });
-    });
-
+    // Optionally, you can broadcast this deletion using WebSockets
     res.json({ message: 'Nation deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete nation' });
   }
 });
-
 // WebSocket notification function
 const notifyClients = (wss, message) => {
   console.log('Notifying WebSocket clients:', message);  // Log the WebSocket message being sent
