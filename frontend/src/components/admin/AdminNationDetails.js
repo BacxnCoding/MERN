@@ -1,52 +1,70 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import NationInfo from '../NationInfo';  // Import the NationInfo component
+import { UserContext } from '../UserContext';  // Import UserContext to access the logged-in user
 
-const AdminNationDetails = ({ match }) => {
-  const nationId = match.params.id;  // Get the nation ID from URL params
+const AdminNationDetails = () => {
+  const { id } = useParams();  // Extract the nation ID from the URL parameters
+  const { user } = useContext(UserContext);  // Get the logged-in user's context (admin or regular user)
   const [nation, setNation] = useState(null);
-  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch the nation's details by ID
-    const fetchNationData = async () => {
+    // Function to fetch the nation's details
+    const fetchNationDetails = async () => {
       try {
-        const nationResponse = await axios.get(`http://localhost:5000/api/nations/${nationId}`);
-        setNation(nationResponse.data);
-
-        // Fetch users who belong to this nation
-        const usersResponse = await axios.get(`http://localhost:5000/api/users?nation=${nationId}`);
-        setUsers(usersResponse.data);
+        const response = await axios.get(`http://localhost:5000/api/nations/${id}`);
+        setNation(response.data);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching nation or users:', error);
+        console.error('Error fetching nation details:', error);
         setLoading(false);
       }
     };
 
-    fetchNationData();
-  }, [nationId]);
+    fetchNationDetails();
+
+    // WebSocket setup for real-time updates
+    const socket = new WebSocket('ws://localhost:5000');
+
+    socket.onopen = () => {
+      console.log('WebSocket connected for real-time nation updates');
+    };
+
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log('WebSocket message received:', message);
+
+      // Update the nation info in real time if the nation ID matches
+      if (message.type === 'nation-update' && message.nation._id === id) {
+        console.log('Handling nation update:', message.nation);
+        setNation(message.nation);  // Update the state with the updated nation info
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    return () => {
+      socket.close();  // Clean up the WebSocket connection when the component unmounts
+    };
+  }, [id]);
 
   if (loading) {
     return <p>Loading nation details...</p>;
   }
 
+  if (!nation) {
+    return <p>Nation not found</p>;
+  }
+
   return (
     <div>
-      <h2>Nation Details: {nation?.name}</h2>
-      <p><strong>National Bank:</strong> ${nation?.nationalBank}</p>
-      <p><strong>People Index:</strong> {nation?.peopleindex}</p>
-      <p><strong>Military Index:</strong> {nation?.militaryindex}</p>
-      <p><strong>Economy Index:</strong> {nation?.economyindex}</p>
-
-      <h3>Users in this Nation:</h3>
-      <ul>
-        {users.map((user) => (
-          <li key={user._id}>
-            {user.username} - <button onClick={() => window.location.href = `/admin/user/${user._id}`}>View User</button>
-          </li>
-        ))}
-      </ul>
+      <h2>Nation Details</h2>
+      {/* Render the NationInfo component and pass the user and nation data */}
+      <NationInfo nation={nation} user={user} />
     </div>
   );
 };
