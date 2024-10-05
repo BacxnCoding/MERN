@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useContext } from 'react';  // Ensure useContext is imported
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../UserContext';  // Ensure UserContext is imported correctly
+import { UserContext } from '../UserContext';  // Ensure UserContext is imported
 
 const AdminDashboard = () => {
-  const { user } = useContext(UserContext);  // Access the logged-in user's details
+  const { user } = useContext(UserContext);  // Get the user context here
   const [nations, setNations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();  // useNavigate for programmatic navigation
+  const navigate = useNavigate();  // To navigate between pages
 
   useEffect(() => {
     const fetchNations = async () => {
@@ -24,18 +24,13 @@ const AdminDashboard = () => {
     fetchNations();
   }, []);
 
+  // Handle the delete action
   const handleDelete = async (nationId) => {
     const password = prompt('Enter admin password to confirm deletion:');
     
-    const normalizedPassword = password.trim();
-    console.log('Entered password (trimmed):', normalizedPassword);
-
-    // Compare the entered password with the logged-in user's password
-    if (normalizedPassword === user.password) {  // Ensure user.password is available
-      console.log('Password is correct. Proceeding with deletion...');
+    if (password === user.password) {  // Ensure the admin's password is correct
       try {
-        const response = await axios.delete(`http://localhost:5000/api/nations/${nationId}`);
-        console.log('Nation deleted:', response);
+        await axios.delete(`http://localhost:5000/api/nations/${nationId}`);
         alert('Nation deleted successfully');
         setNations((prevNations) => prevNations.filter(nation => nation._id !== nationId));  // Remove nation from list
       } catch (error) {
@@ -43,7 +38,22 @@ const AdminDashboard = () => {
         alert('Failed to delete the nation');
       }
     } else {
-      console.log('Incorrect password:', normalizedPassword);
+      alert('Incorrect password!');
+    }
+  };
+
+  // Handle the "View Nation" action
+  const handleViewNation = (nationId) => {
+    navigate(`/admin/nation/${nationId}`);  // Navigate to the nation details page
+  };
+
+  // Handle the "Edit Nation" action
+  const handleEdit = (nationId) => {
+    const password = prompt('Enter admin password to confirm editing:');
+
+    if (password === user.password) {  // Ensure the admin's password is correct
+      navigate(`/admin/nation/edit/${nationId}`);  // Redirect to the edit page
+    } else {
       alert('Incorrect password!');
     }
   };
@@ -68,7 +78,8 @@ const AdminDashboard = () => {
               <td>{nation.name}</td>
               <td>
                 <button onClick={() => handleDelete(nation._id)}>Delete</button>
-                <button onClick={() => navigate(`/admin/nation/${nation._id}`)}>View Nation</button>
+                <button onClick={() => handleViewNation(nation._id)}>View Nation</button>
+                <button onClick={() => handleEdit(nation._id)}>Edit Nation</button>  {/* Ensure edit button works */}
               </td>
             </tr>
           ))}

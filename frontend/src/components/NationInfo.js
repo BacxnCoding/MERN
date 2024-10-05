@@ -37,6 +37,7 @@ const NationInfo = ({ nation, user }) => {
           <h3>Spending</h3>
           <p><strong>Debt:</strong> {nation?.economy?.spending?.debt}</p>
           <p><strong>Imports:</strong> {nation?.economy?.spending?.imports}</p>
+          <p><strong>Inflation:</strong> {nation?.economy?.inflation}</p>
         </>
       )}
 

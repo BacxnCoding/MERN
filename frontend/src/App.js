@@ -12,6 +12,8 @@ import { UserContext } from './components/UserContext';  // Import UserContext f
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminNationDetails from './components/admin/AdminNationDetails';
 import AdminUserDetails from './components/admin/AdminUserDetails';
+import AdminEditNation from './components/admin/AdminEditNation';
+
 
 const App = () => {
   const { user, logout } = useContext(UserContext);  // Get user state and logout function from context
@@ -64,6 +66,7 @@ const App = () => {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/nation/:id" element={<AdminNationDetails />} />
               <Route path="/admin/user/:id" element={<AdminUserDetails />} />
+              <Route path="/admin/nation/edit/:id" element={<AdminEditNation />} />
             </>
           )}
 
