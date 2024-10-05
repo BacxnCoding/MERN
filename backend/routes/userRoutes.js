@@ -31,8 +31,12 @@ router.post('/', async (req, res) => {
     const newUser = new User(req.body);
     const savedUser = await newUser.save();
 
-    // Notify clients
-    notifyClients({ type: 'user-create', user: savedUser });
+    // Notify clients via WebSocket
+    req.wss.clients.forEach((client) => {
+      if (client.readyState === 1) {  // WebSocket.OPEN is 1
+        client.send(JSON.stringify({ type: 'user-create', user: savedUser }));
+      }
+    });
 
     res.status(201).json(savedUser);
   } catch (error) {
@@ -40,13 +44,21 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update user by ID
-router.put('/:id', async (req, res) => {
+// Update user by ID (using PATCH for partial updates)
+router.patch('/:id', async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
-    // Notify clients
-    notifyClients({ type: 'user-update', user: updatedUser });
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Notify clients via WebSocket
+    req.wss.clients.forEach((client) => {
+      if (client.readyState === 1) {  // WebSocket.OPEN is 1
+        client.send(JSON.stringify({ type: 'user-update', user: updatedUser }));
+      }
+    });
 
     res.json(updatedUser);
   } catch (error) {
@@ -59,22 +71,21 @@ router.delete('/:id', async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
 
-    // Notify clients
-    notifyClients({ type: 'user-delete', userId: deletedUser._id });
+    if (!deletedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Notify clients via WebSocket
+    req.wss.clients.forEach((client) => {
+      if (client.readyState === 1) {  // WebSocket.OPEN is 1
+        client.send(JSON.stringify({ type: 'user-delete', userId: deletedUser._id }));
+      }
+    });
 
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });
-
-// WebSocket notification function
-const notifyClients = (message) => {
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(message));
-    }
-  });
-};
 
 module.exports = router;
