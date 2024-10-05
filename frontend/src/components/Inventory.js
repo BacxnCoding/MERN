@@ -2,26 +2,26 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from './UserContext';
 import Shop from './Shop';
 import NationInfo from './NationInfo';
-import axios from 'axios';  // For fetching user and nation data
+import axios from 'axios';  // For fetching nation data
 
 const Inventory = () => {
   const { user, setUser } = useContext(UserContext);
   const [nation, setNation] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);  // State for tracking loading status
 
   useEffect(() => {
-    // Fetch the user's specific nation data by ID
+    // Fetch the user's specific nation data by ID when the component mounts
     const fetchNationData = async () => {
       try {
-        if (user && user.nation_id) {
+        if (user && user.nation_id) {  // Ensure the user and nation_id exist
           const response = await axios.get(`http://localhost:5000/api/nations/${user.nation_id}`);
-          console.log('Fetched nation data:', response.data);
-          setNation(response.data);
+          console.log('Fetched nation data:', response.data);  // Log the fetched nation data
+          setNation(response.data);  // Set the specific nation data
         }
-        setLoading(false);
+        setLoading(false);  // Stop loading when data is fetched
       } catch (error) {
         console.error('Error fetching nation data:', error);
-        setLoading(false);
+        setLoading(false);  // Stop loading even if there's an error
       }
     };
 
@@ -40,13 +40,6 @@ const Inventory = () => {
       console.log('WebSocket message received:', message);
 
       switch (message.type) {
-        case 'user-update':
-          if (message.user._id === user._id) {  // Update only if the user's ID matches
-            console.log('Handling user update:', message.user);
-            setUser(message.user);  // Update the user state with real-time data
-          }
-          break;
-
         case 'nation-update':
           if (message.nation._id === user.nation_id) {  // Update only if the nation's ID matches the user's nation
             console.log('Handling nation update:', message.nation);
@@ -63,11 +56,12 @@ const Inventory = () => {
       console.error('WebSocket error:', error);
     };
 
+    // Cleanup WebSocket connection on component unmount
     return () => {
       console.log('WebSocket disconnected');
       socket.close();
     };
-  }, [user, setUser]);
+  }, [user]);
 
   return (
     <div>
@@ -94,6 +88,7 @@ const Inventory = () => {
         )}
       </ul>
 
+      {/* Shop component for purchasing */}
       <Shop user={user} />
     </div>
   );
