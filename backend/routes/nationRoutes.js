@@ -30,19 +30,32 @@ router.get('/:id', async (req, res) => {
 
 // Create a new nation
 router.post('/', async (req, res) => {
-  try {
-    const newNation = new Nation(req.body);
-    const savedNation = await newNation.save();
+  const { name, nationalBank, peopleindex, militaryindex, economyindex, people, military, economy } = req.body;
 
-    console.log('Nation created:', savedNation);  // Log nation creation
-    process.nextTick(() => {
-      console.log('Broadcasting nation creation to WebSocket clients');  // Log WebSocket broadcast
-      notifyClients(req.wss, { type: 'nation-create', nation: savedNation });
+  try {
+    // Check if nation name already exists
+    const existingNation = await Nation.findOne({ name });
+    if (existingNation) {
+      return res.status(400).json({ message: 'Nation name already in use' });
+    }
+
+    // Create a new nation
+    const newNation = new Nation({
+      name,
+      nationalBank,
+      peopleindex,
+      militaryindex,
+      economyindex,
+      people,
+      military,
+      economy
     });
 
-    res.status(201).json(savedNation);
+    await newNation.save();
+    res.status(201).json(newNation);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create nation' });
+    console.error('Error creating nation:', error);
+    res.status(500).json({ message: 'Server error, please try again later.' });
   }
 });
 

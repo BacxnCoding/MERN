@@ -27,20 +27,30 @@ router.get('/:id', async (req, res) => {
 
 // Create a new user
 router.post('/', async (req, res) => {
-  try {
-    const newUser = new User(req.body);
-    const savedUser = await newUser.save();
+  const { username, password, bankAccount, isAdmin, nation_id, roles } = req.body;
 
-    // Notify clients via WebSocket
-    req.wss.clients.forEach((client) => {
-      if (client.readyState === 1) {  // WebSocket.OPEN is 1
-        client.send(JSON.stringify({ type: 'user-create', user: savedUser }));
-      }
+  try {
+    // Check if username already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username already in use' });  // Send error response
+    }
+
+    // Create the new user if username is not in use
+    const newUser = new User({
+      username,
+      password,
+      bankAccount,
+      isAdmin,
+      nation_id,
+      roles,
     });
 
-    res.status(201).json(savedUser);
+    await newUser.save();
+    res.status(201).json(newUser);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create user' });
+    console.error('Error creating user:', error);
+    res.status(500).json({ message: 'Server error, please try again later.' });
   }
 });
 
