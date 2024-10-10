@@ -1,11 +1,16 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';  // For React 18
 import App from './App';
-import { UserProvider } from './components/UserContext';  // Import UserProvider
+import { BrowserRouter } from 'react-router-dom';  // Import BrowserRouter here
+import { UserProvider } from './components/UserContext';  // Ensure correct path
 
-ReactDOM.render(
-  <UserProvider> {/* Wrap the entire app */}
-    <App />
-  </UserProvider>,
-  document.getElementById('root')
+const container = document.getElementById('root');
+const root = createRoot(container);  // React 18 createRoot
+
+root.render(
+  <UserProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </UserProvider>
 );
