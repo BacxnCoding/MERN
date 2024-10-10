@@ -57,8 +57,19 @@ router.post('/', async (req, res) => {
 // Update user by ID (using PATCH for partial updates)
 router.patch('/:id', async (req, res) => {
   try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // Destructure nation_id and other fields from the request body
+    const { nation_id, ...otherFields } = req.body;
 
+    // Prepare the update object
+    const updateFields = {
+      ...otherFields,
+      nation_id: nation_id === '' ? null : nation_id, // Convert empty string to null
+    };
+
+    // Update the user with the specified fields
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+
+    // Check if the user was found and updated
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -70,11 +81,14 @@ router.patch('/:id', async (req, res) => {
       }
     });
 
+    // Respond with the updated user
     res.json(updatedUser);
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ error: 'Failed to update user roles' });
   }
 });
+
 
 // Delete a user by ID
 router.delete('/:id', async (req, res) => {

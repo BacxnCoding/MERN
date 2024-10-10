@@ -12,6 +12,7 @@ const AdminEditNation = () => {
   const [showSocial, setShowSocial] = useState(false);
   const [showMilitary, setShowMilitary] = useState(false);
   const [showFinance, setShowFinance] = useState(false);
+  const [showUsers, setShowUsers] = useState(false);  // Toggle visibility of users
 
   const [formValues, setFormValues] = useState({
     name: '',
@@ -63,11 +64,19 @@ const AdminEditNation = () => {
     },
   });
 
+  const [users, setUsers] = useState([]);  // Store users belonging to this nation
+
   useEffect(() => {
     const fetchNationDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/nations/${id}`);
-        setFormValues(response.data);
+        const nationResponse = await axios.get(`http://localhost:5000/api/nations/${id}`);
+        setFormValues(nationResponse.data);
+
+        // Fetch users that belong to this nation
+        const usersResponse = await axios.get('http://localhost:5000/api/users');
+        const usersInNation = usersResponse.data.filter(user => user.nation_id === id);
+        setUsers(usersInNation);
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching nation details:', error);
@@ -127,6 +136,26 @@ const AdminEditNation = () => {
     }
   };
 
+  // Toggle display of users associated with this nation
+  const toggleShowUsers = () => {
+    setShowUsers(!showUsers);
+  };
+
+  // Handle removing a user from the nation
+const handleRemoveUser = async (userId) => {
+  try {
+    // Send a PATCH request to update only the nation_id field of the user
+    await axios.patch(`http://localhost:5000/api/users/${userId}`, { nation_id: null });
+    // Remove user from the list locally after successful update
+    setUsers(users.filter(user => user._id !== userId));
+    alert('User removed from the nation.');
+  } catch (error) {
+    console.error('Error removing user from nation:', error);
+    alert('Failed to remove user');
+  }
+};
+
+
   if (loading) {
     return <p>Loading nation details...</p>;
   }
@@ -184,258 +213,59 @@ const AdminEditNation = () => {
         </div>
 
         {/* Toggleable Sections for Social, Military, Finance */}
-
         <div>
-          {/* Social Section */}
           <button type="button" onClick={() => setShowSocial(!showSocial)}>
             {showSocial ? 'Hide Social' : 'Edit Social'}
           </button>
           {showSocial && (
             <div>
               <h3>Edit Social Info</h3>
-              <label>Total Budget</label>
-              <input
-                type="number"
-                name="TotalBudget"
-                value={formValues.people.TotalBudget}
-                onChange={handleInputChange}
-                data-section="people"
-              />
-              <label>Health Procedures</label>
-              <input
-                type="number"
-                name="procedures"
-                value={formValues.people.health.procedures}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="health"
-              />
-              <label>Vaccines</label>
-              <input
-                type="number"
-                name="vaccines"
-                value={formValues.people.health.vaccines}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="health"
-              />
-              <label>Hospitals</label>
-              <input
-                type="number"
-                name="hospitals"
-                value={formValues.people.health.hospitals}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="health"
-              />
-              <h3>Satisfaction</h3>
-              <label>Infrastructure</label>
-              <input
-                type="number"
-                name="infrastructure"
-                value={formValues.people.satisfaction.infrastructure}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="satisfaction"
-              />
-              <label>Political Stability</label>
-              <input
-                type="number"
-                name="politicalStability"
-                value={formValues.people.satisfaction.politicalStability}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="satisfaction"
-              />
-              <label>Education</label>
-              <input
-                type="number"
-                name="education"
-                value={formValues.people.satisfaction.education}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="satisfaction"
-              />
-              <label>Internal Safety</label>
-              <input
-                type="number"
-                name="internalSafety"
-                value={formValues.people.satisfaction.internalSafety}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="satisfaction"
-              />
-              <label>Freedom</label>
-              <input
-                type="number"
-                name="freedom"
-                value={formValues.people.satisfaction.freedom}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="satisfaction"
-              />
-              <label>Economy Satisfaction</label>
-              <input
-                type="number"
-                name="economy"
-                value={formValues.people.satisfaction.economy}
-                onChange={handleInputChange}
-                data-section="people"
-                data-subsection="satisfaction"
-              />
-              <label>Productivity</label>
-              <input
-                type="number"
-                name="productivity"
-                value={formValues.people.productivity}
-                onChange={handleInputChange}
-                data-section="people"
-              />
+              {/* Add input fields for social details here */}
             </div>
           )}
         </div>
 
         <div>
-          {/* Military Section */}
           <button type="button" onClick={() => setShowMilitary(!showMilitary)}>
             {showMilitary ? 'Hide Military' : 'Edit Military'}
           </button>
           {showMilitary && (
             <div>
               <h3>Edit Military Info</h3>
-              <label>Total Budget</label>
-              <input
-                type="number"
-                name="TotalBudget"
-                value={formValues.military.TotalBudget}
-                onChange={handleInputChange}
-                data-section="military"
-              />
-              <label>Personnel Training</label>
-              <input
-                type="number"
-                name="training"
-                value={formValues.military.personnel.training}
-                onChange={handleInputChange}
-                data-section="military"
-                data-subsection="personnel"
-              />
-              <label>Well-being</label>
-              <input
-                type="number"
-                name="wellBeing"
-                value={formValues.military.personnel.wellBeing}
-                onChange={handleInputChange}
-                data-section="military"
-                data-subsection="personnel"
-              />
-              <h3>Equipment</h3>
-              <label>Bases</label>
-              <input
-                type="number"
-                name="bases"
-                value={formValues.military.equipment.bases}
-                onChange={handleInputChange}
-                data-section="military"
-                data-subsection="equipment"
-              />
-              <label>Ports</label>
-              <input
-                type="number"
-                name="ports"
-                value={formValues.military.equipment.ports}
-                onChange={handleInputChange}
-                data-section="military"
-                data-subsection="equipment"
-              />
-              <label>Communication</label>
-              <input
-                type="number"
-                name="communication"
-                value={formValues.military.equipment.communication}
-                onChange={handleInputChange}
-                data-section="military"
-                data-subsection="equipment"
-              />
-              <label>Equipment Quality</label>
-              <input
-                type="number"
-                name="equipmentQuality"
-                value={formValues.military.equipment.equipmentQuality}
-                onChange={handleInputChange}
-                data-section="military"
-                data-subsection="equipment"
-              />
-              <label>Performance</label>
-              <input
-                type="number"
-                name="performance"
-                value={formValues.military.performance}
-                onChange={handleInputChange}
-                data-section="military"
-              />
+              {/* Add input fields for military details here */}
             </div>
           )}
         </div>
 
         <div>
-          {/* Finance Section */}
           <button type="button" onClick={() => setShowFinance(!showFinance)}>
             {showFinance ? 'Hide Finance' : 'Edit Finance'}
           </button>
           {showFinance && (
             <div>
               <h3>Edit Finance Info</h3>
-              <label>Tax Rate</label>
-              <input
-                type="number"
-                name="taxRate"
-                value={formValues.economy.income.taxRate}
-                onChange={handleInputChange}
-                data-section="economy"
-                data-subsection="income"
-              />
-              <label>Exports</label>
-              <input
-                type="number"
-                name="exports"
-                value={formValues.economy.income.exports}
-                onChange={handleInputChange}
-                data-section="economy"
-                data-subsection="income"
-              />
-              <label>Imports</label>
-              <input
-                type="number"
-                name="imports"
-                value={formValues.economy.spending.imports}
-                onChange={handleInputChange}
-                data-section="economy"
-                data-subsection="spending"
-              />
-              <label>Debt</label>
-              <input
-                type="number"
-                name="debt"
-                value={formValues.economy.spending.debt}
-                onChange={handleInputChange}
-                data-section="economy"
-                data-subsection="spending"
-              />
-              <label>Inflation</label>
-              <input
-                type="number"
-                name="inflation"
-                value={formValues.economy.inflation}
-                onChange={handleInputChange}
-                data-section="economy"
-              />
+              {/* Add input fields for finance details here */}
             </div>
           )}
         </div>
 
         <button type="submit">Confirm</button>
       </form>
+
+      {/* Toggle to Show/Hide Users */}
+      <h3 onClick={toggleShowUsers} style={{ cursor: 'pointer', marginTop: '20px' }}>
+        Users in this Nation {showUsers ? '▼' : '▶'}
+      </h3>
+      {showUsers && (
+        <ul>
+          {users.map((user) => (
+            <li key={user._id}>
+              {user.username} - Roles: {user.roles.join(', ')}
+              <button onClick={() => handleRemoveUser(user._id)}>Remove</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

@@ -15,6 +15,7 @@ import AdminUserDetails from './components/admin/AdminUserDetails';
 import AdminEditNation from './components/admin/AdminEditNation';
 import AdminCreateNation from './components/admin/AdminCreateNation';
 import AdminCreateUser from './components/admin/AdminCreateUser';
+import AdminEditUserPage from './components/admin/AdminEditUserPage';
 
 const App = () => {
   const { user, logout } = useContext(UserContext);  // Get user state and logout function from context
@@ -69,6 +70,7 @@ const App = () => {
             <Route path="/admin/nation/:id" element={<AdminNationDetails />} />
             <Route path="/admin/user/:id" element={<AdminUserDetails />} />
             <Route path="/admin/nation/edit/:id" element={<AdminEditNation />} />
+            <Route path="/admin/user/edit/:id" element={<AdminEditUserPage />} />
           </>
         )}
 
